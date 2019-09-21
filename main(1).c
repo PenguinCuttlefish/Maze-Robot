@@ -21,12 +21,17 @@
 // SYMBOLIC CONSTANTS
 //====================================================================
 #define sw0		 GPIO_IDR_0		//Bitmask for switch 0
+#define sw1      GPIO_IDR_1     //Bitmask for switch 1
 #define PB3      GPIO_IDR_3
 #define PB4      GPIO_IDR_4
 #define PB5      GPIO_IDR_5
 #define PB6      GPIO_IDR_6
 #define PB7      GPIO_IDR_7
 #define PB8      GPIO_IDR_8
+#define PA1      GPIO_ODR_1
+#define PA2      GPIO_ODR_2
+#define PA3      GPIO_ODR_3
+#define PA4      GPIO_ODR_4
 //====================================================================
 // GLOBAL VARIABLES
 //====================================================================
@@ -67,7 +72,6 @@ void main(void)
 	//start once sw0 has been pressed
 	while(start == 1){
 		get_sensor_status();
-		sensor_state = 'F';				//Default value for sensor state(think i can include this in the global variable but will test first)
 		move_Forward();					//Default function is move Forward
 
 		for(int i = 0;i < 4; i++){		//Prevents more than 4 consecutive left turns in a row
@@ -194,19 +198,19 @@ void init_Ports(void){
 	GPIOA->PUPDR |= GPIO_PUPDR_PUPDR0_0;	//Enable pull up resister for start switch SW0
 
 //Set pins to input for sensors
-	GPIOB->MODER &= ~ (GPIO_MODER_MODER3_0|  //PB3 to output for sensor LL
-					   GPIO_MODER_MODER4_0|  //PB4 to output for sensor L
-					   GPIO_MODER_MODER5_0|  //PB5 to output for sensor |
-					   GPIO_MODER_MODER6_0|  //PB6 to output for sensor R
-					   GPIO_MODER_MODER7_0|	 //PB7 to output for sensor RR
-					   GPIO_MODER_MODER8_0); //PB8 to output for FINISH sensor
+	GPIOB->MODER &= ~ (GPIO_MODER_MODER3_0|  //PB3 to input for sensor LL
+					   GPIO_MODER_MODER4_0|  //PB4 to input for sensor L
+					   GPIO_MODER_MODER5_0|  //PB5 to input for sensor |
+					   GPIO_MODER_MODER6_0|  //PB6 to input for sensor R
+					   GPIO_MODER_MODER7_0|	 //PB7 to input for sensor RR
+					   GPIO_MODER_MODER8_0); //PB8 to input for FINISH sensor
 
 //OUTPUTS
 //Set pins to output for motor driver
-	GPIOA->MODER |= GPIO_MODER_MODER1_0; 	//PA1 to output (PA1 and PA2 are for the left motor )
-	GPIOA->MODER |= GPIO_MODER_MODER2_0; 	//PA2 to output
-	GPIOA->MODER |= GPIO_MODER_MODER3_0; 	//PA3 to output (PA3 and PA4 are for the right motor)
-	GPIOA->MODER |= GPIO_MODER_MODER4_0; 	//PA4 to output
+	GPIOA->MODER |= GPIO_MODER_MODER1_0; 	//PA1 to output (input 1 of motor driver (left motor))
+	GPIOA->MODER |= GPIO_MODER_MODER2_0; 	//PA2 to output (input 2 of motor driver (left motor))
+	GPIOA->MODER |= GPIO_MODER_MODER3_0; 	//PA3 to output (input 3 of motor driver (right motor))
+	GPIOA->MODER |= GPIO_MODER_MODER4_0; 	//PA4 to output (input 3 of motor driver (right motor))
 
 //Set pins for PWM
 }
@@ -256,38 +260,42 @@ void get_sensor_status(void)
             &&((GPIOB_IDR & PB6) == 0)&&((GPIOB_IDR & PB7) == 0)&&((GPIOB_IDR & PB8) == 0))
     {
         printf("no lines detected");
-        sensor_state= 'E';
+        sensor_state= 'E'; //Stop robot to check for issues
     }
     else
     {
         printf("pattern not recognized");
-        sensor_state = 'E';
+        sensor_state = 'E'; //Stop robot to check for issues
     }
 }
 
 void move_Forward(void)
 {
-
+    direction = 'F';
+    GPIO->ODR = 0b10010; //Set PA1 and PA4 high; PA2 and PA3 low
 }
 
 void turn_Left(void)
 {
-
+    direction = 'L';
+    GPIO->ODR = 0b10000; // Set PA1,PA2,PA3 low and PA4 high
 }
 
 void turn_Right(void)
 {
-    direction = 'R'
+    direction = 'R';
+    GPIO->ODR = 0b00010; // Set PA1 high; PA2,PA3 and PA4 low
 }
 
 void U_turn(void)
 {
-
+    direction = 'U';
+    GPIO->ODR = 0b10100; // Set PA1, PA3 low and PA2, PA4 high
 }
 
 void stop(void)
 {
-
+    GIOP->ODR = 0b00000; //Set PA1, PA2, PA3 and PA4 low
 }
 
 void shorten_path(void)
