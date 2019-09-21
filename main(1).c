@@ -273,24 +273,50 @@ void move_Forward(void)
 {
     direction = 'F';
     GPIO->ODR = 0b10010; //Set PA1 and PA4 high; PA2 and PA3 low
+    while(sensor_state=='F')
+    {
+        get_sensor_status();  //Breaks out of while loop when a junction/deadend is detected
+    }
+    GPIO->ODR = 0b00000; //Stop robot and go back to switch case with new sensor state
 }
 
 void turn_Left(void)
 {
     direction = 'L';
     GPIO->ODR = 0b10000; // Set PA1,PA2,PA3 low and PA4 high
+    delay(5000);         // Allows robot to turn for set amount of time
+    while(sensor_state=='F')
+    {
+        GPIO->ODR = 0b10010;  // Make robot go forward
+        get_sensor_status();  //Breaks out of while loop when a junction/deadend is detected
+    }
+    GPIO->ODR = 0b00000; //Stop robot
 }
 
 void turn_Right(void)
 {
     direction = 'R';
     GPIO->ODR = 0b00010; // Set PA1 high; PA2,PA3 and PA4 low
+    delay(5000);         // Allows robot to turn for set amount of time
+    while(sensor_state=='F')
+    {
+        GPIO->ODR = 0b10010;  // Make robot go forward
+        get_sensor_status();  //Breaks out of while loop when a junction/deadend is detected
+    }
+    GPIO->ODR = 0b00000; //Stop robot
 }
 
 void U_turn(void)
 {
     direction = 'U';
     GPIO->ODR = 0b10100; // Set PA1, PA3 low and PA2, PA4 high
+    delay(5000);         // Allows robot to turn for set amount of time
+    while(sensor_state=='F')
+    {
+        GPIO->ODR = 0b10010;  // Make robot go forward
+        get_sensor_status();  //Breaks out of while loop when a junction/deadend is detected
+    }
+    GPIO->ODR = 0b00000; //Stop robot
 }
 
 void stop(void)
