@@ -71,7 +71,7 @@ void main(void)
 		move_Forward();					//Default function is move Forward
 
 		for(int i = 0;i < 4; i++){		//Prevents more than 4 consecutive left turns in a row
-			switch(sensor_state)				//Switch case for sensor states commands
+			switch(sensor_state)		//Switch case for sensor states commands
 			{
 			case 'R':						//Right Turn Only detected
 				turn_Right();				//Call function to turn robot right
@@ -212,29 +212,56 @@ void init_Ports(void){
 }
 void get_sensor_status(void)
 {
-    if(((GPIOB_IDR & PB3) != 0)&&((GPIOB_IDR & PB4) != 0)&&((GPIOB_IDR & PB5) != 0)&&((GPIOB_IDR & PB6) != 0)&&((GPIOB_IDR & PB7) != 0)&&((GPIOB_IDR & PB8) != 0))
+    if(((GPIOB_IDR & PB3) != 0)&&((GPIOB_IDR & PB4) != 0)&&((GPIOB_IDR & PB5) != 0)
+       &&((GPIOB_IDR & PB6) != 0)&&((GPIOB_IDR & PB7) != 0)&&((GPIOB_IDR & PB8) != 0))
     {
-        sensor_state = 'X';
+        sensor_state = 'E'; //End detected
     }
-    else if(((GPIOB_IDR & PB3) == 0)&&((GPIOB_IDR & PB4) == 0)&&((GPIOB_IDR & PB5) != 0)&&((GPIOB_IDR & PB6) == 0)&&((GPIOB_IDR & PB7) == 0))
+    else if(((GPIOB_IDR & PB3) == 0)&&((GPIOB_IDR & PB4) == 0)&&((GPIOB_IDR & PB5) != 0)
+            &&((GPIOB_IDR & PB6) == 0)&&((GPIOB_IDR & PB7) == 0))
     {
-        sensor_state = 'F';
+        sensor_state = 'F'; //Single line detected
     }
-    else if(((GPIOB_IDR & PB3) != 0)&&((GPIOB_IDR & PB4) != 0)&&((GPIOB_IDR & PB5) != 0)&&((GPIOB_IDR & PB6) != 0)&&((GPIOB_IDR & PB7) != 0)&&((GPIOB_IDR & PB8) == 0))
+    else if(((GPIOB_IDR & PB3) != 0)&&((GPIOB_IDR & PB4) != 0)&&((GPIOB_IDR & PB5) != 0)
+            &&((GPIOB_IDR & PB6) != 0)&&((GPIOB_IDR & PB7) != 0)&&((GPIOB_IDR & PB8) == 0))
     {
-        sensor_state = 'T';
+        sensor_state = 'X'; //Cross intersection detected
     }
-    else if(((GPIOB_IDR & PB3) != 0)&&((GPIOB_IDR & PB4) != 0)&&((GPIOB_IDR & PB5) != 0)&&((GPIOB_IDR & PB6) == 0)&&((GPIOB_IDR & PB7) == 0))
+    else if(((GPIOB_IDR & PB3) != 0)&&((GPIOB_IDR & PB4) != 0)&&((GPIOB_IDR & PB5) == 0)
+            &&((GPIOB_IDR & PB6) != 0)&&((GPIOB_IDR & PB7) != 0)&&((GPIOB_IDR & PB8) == 0))
     {
-        sensor_state = 'J';
+        sensor_state = 'T'; //T junction detected
     }
-    else if(((GPIOB_IDR & PB3) == 0)&&((GPIOB_IDR & PB4) == 0)&&((GPIOB_IDR & PB5) != 0)&&((GPIOB_IDR & PB6) != 0)&&((GPIOB_IDR & PB7) != 0))
+    else if(((GPIOB_IDR & PB3) != 0)&&((GPIOB_IDR & PB4) != 0)&&((GPIOB_IDR & PB5) != 0)
+            &&((GPIOB_IDR & PB6) == 0)&&((GPIOB_IDR & PB7) == 0))
     {
-        sensor_state = 'I';
+        sensor_state = 'J'; // Left T detected
     }
-    else if(((GPIOB_IDR & PB3) == 0)&&((GPIOB_IDR & PB4) == 0)&&((GPIOB_IDR & PB5) == 0)&&((GPIOB_IDR & PB6) == 0)&&((GPIOB_IDR & PB7) == 0)&&((GPIOB_IDR & PB8) == 0))
+    else if(((GPIOB_IDR & PB3) == 0)&&((GPIOB_IDR & PB4) == 0)&&((GPIOB_IDR & PB5) != 0)
+            &&((GPIOB_IDR & PB6) != 0)&&((GPIOB_IDR & PB7) != 0))
+    {
+        sensor_state = 'I'; // Right T detected
+    }
+    else if(((GPIOB_IDR & PB3) != 0)&&((GPIOB_IDR & PB4) != 0)&&((GPIOB_IDR & PB5) == 0)
+            &&((GPIOB_IDR & PB6) == 0)&&((GPIOB_IDR & PB7) == 0))
+    {
+        sensor_state = 'L'; // Left Turn detected
+    }
+    else if(((GPIOB_IDR & PB3) == 0)&&((GPIOB_IDR & PB4) == 0)&&((GPIOB_IDR & PB5) == 0)
+            &&((GPIOB_IDR & PB6) != 0)&&((GPIOB_IDR & PB7) != 0))
+    {
+        sensor_state = 'R'; // Right Turn detected
+    }
+    else if(((GPIOB_IDR & PB3) == 0)&&((GPIOB_IDR & PB4) == 0)&&((GPIOB_IDR & PB5) == 0)
+            &&((GPIOB_IDR & PB6) == 0)&&((GPIOB_IDR & PB7) == 0)&&((GPIOB_IDR & PB8) == 0))
     {
         printf("no lines detected");
+        sensor_state= 'E';
+    }
+    else
+    {
+        printf("pattern not recognized");
+        sensor_state = 'E';
     }
 }
 
