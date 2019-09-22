@@ -79,7 +79,7 @@ void main(void)
     {
 		move_Forward();					//Default function is move Forward
 
-		for(int i = 0;i < 4; i++){		//Prevents more than 4 consecutive left turns in a row
+		for(int i = 0;i < 4; i++){      //Prevents more than 4 consecutive left turns in a row
 			switch(sensor_state)		//Switch case for sensor states commands
 			{
 			case 'R':						//Right Turn Only detected
@@ -463,6 +463,7 @@ void return_to_start(void)
 
 void race(void)  //Takes shortest path from start to end
 {
+    U_turn();
     for(int id = 0; id < number_of_turns+1; id++)
     {
         switch(Path[id])
