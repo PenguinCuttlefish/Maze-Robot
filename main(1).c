@@ -53,6 +53,7 @@ void turn_Right(void);
 void U_turn(void);
 void stop(void);
 void shorten_path(void);
+void realign(void);
 //====================================================================
 // MAIN FUNCTION
 //====================================================================
@@ -71,10 +72,10 @@ void main(void)
 
 	//start once sw0 has been pressed
 	while(start == 1){
-		get_sensor_status();
 		move_Forward();					//Default function is move Forward
 
 		for(int i = 0;i < 4; i++){		//Prevents more than 4 consecutive left turns in a row
+			//                                     get_sensor_status();
 			switch(sensor_state)		//Switch case for sensor states commands
 			{
 			case 'R':						//Right Turn Only detected
@@ -257,25 +258,30 @@ void get_sensor_status(void)
         sensor_state = 'R'; // Right Turn detected
     }
     else if(((GPIOB_IDR & PB3) == 0)&&((GPIOB_IDR & PB4) == 0)&&((GPIOB_IDR & PB5) == 0)
-            &&((GPIOB_IDR & PB6) == 0)&&((GPIOB_IDR & PB7) == 0)&&((GPIOB_IDR & PB8) == 0))
+            &&((GPIOB_IDR & PB6) == 0)&&((GPIOB_IDR & PB7) == 0))
     {
         printf("no lines detected");
-        sensor_state= 'E'; //Stop robot to check for issues
+        sensor_state = 'U'; // Dead end detected
     }
     else
     {
         printf("pattern not recognized");
-        sensor_state = 'E'; //Stop robot to check for issues
+        sensor_state = 'N'; // Must realign
     }
 }
 
 void move_Forward(void)
 {
     direction = 'F';
-    GPIO->ODR = 0b10010; //Set PA1 and PA4 high; PA2 and PA3 low
+
     while(sensor_state=='F')
     {
+        GPIO->ODR = 0b10010;  //Set PA1 and PA4 high; PA2 and PA3 low
         get_sensor_status();  //Breaks out of while loop when a junction/deadend is detected
+        if(sensor_state=='N')
+        {
+            realign();
+        }
     }
     GPIO->ODR = 0b00000; //Stop robot and go back to switch case with new sensor state
 }
@@ -285,10 +291,19 @@ void turn_Left(void)
     direction = 'L';
     GPIO->ODR = 0b10000; // Set PA1,PA2,PA3 low and PA4 high
     delay(5000);         // Allows robot to turn for set amount of time
-    while(sensor_state=='F')
+    get_sensor_status();  //Check if robot is aligned otherwise realign
+    if(sensor_state=='N')
+    {
+        realign();
+    }
+    while(sensor_state=='F') //Once realigned, sensor_state == 'F'
     {
         GPIO->ODR = 0b10010;  // Make robot go forward
         get_sensor_status();  //Breaks out of while loop when a junction/deadend is detected
+        if(sensor_state=='N')
+        {
+            realign();
+        }
     }
     GPIO->ODR = 0b00000; //Stop robot
 }
@@ -298,10 +313,19 @@ void turn_Right(void)
     direction = 'R';
     GPIO->ODR = 0b00010; // Set PA1 high; PA2,PA3 and PA4 low
     delay(5000);         // Allows robot to turn for set amount of time
+    get_sensor_status();  //Check if robot is aligned otherwise realign
+    if(sensor_state=='N')
+    {
+        realign();
+    }
     while(sensor_state=='F')
     {
         GPIO->ODR = 0b10010;  // Make robot go forward
         get_sensor_status();  //Breaks out of while loop when a junction/deadend is detected
+        if(sensor_state=='N')
+        {
+            realign();
+        }
     }
     GPIO->ODR = 0b00000; //Stop robot
 }
@@ -311,10 +335,19 @@ void U_turn(void)
     direction = 'U';
     GPIO->ODR = 0b10100; // Set PA1, PA3 low and PA2, PA4 high
     delay(5000);         // Allows robot to turn for set amount of time
+    get_sensor_status();  //Check if robot is aligned otherwise realign
+    if(sensor_state=='N')
+    {
+        realign();
+    }
     while(sensor_state=='F')
     {
         GPIO->ODR = 0b10010;  // Make robot go forward
         get_sensor_status();  //Breaks out of while loop when a junction/deadend is detected
+        if(sensor_state=='N')
+        {
+            realign();
+        }
     }
     GPIO->ODR = 0b00000; //Stop robot
 }
@@ -364,6 +397,27 @@ void delay(int a)
 		for(j=0;j<a;j++){
 		}
 	}
+}
+void realign(void) // Realigns robot onto a straight line
+{
+    if(((GPIO->IDR & PB4)!=0)&&((GPIO->IDR & PB3)==0)) //outer left sensor not detected, inner left detected
+    {
+        while(sensor_state!='F')
+        {
+            GPIO->ODR = 0b00010; // turn right until realigned
+            get_sensor_status();
+        }
+        GPIO->ODR = 0b10010; // go straight
+    }
+    else if(((GPIO->IDR & PB6)!=0)&&((GPIO->IDR & PB7)==0)) //outer right sensor not detected, inner right detected
+    {
+        while(sensor_state!='F')
+        {
+            GPIO->ODR = 0b10000; // turn left until realigned
+            get_sensor_status();
+        }
+        GPIO->ODR = 0b10010; // go straight
+    }
 }
 //********************************************************************
 // END OF PROGRAM
