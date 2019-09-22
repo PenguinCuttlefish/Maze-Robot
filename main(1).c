@@ -1,12 +1,12 @@
 //********************************************************************
 //*                    EEE2046F/EEE2050F C template                  *
 //*==================================================================*
-//* WRITTEN BY:    	                 		             *
+//* WRITTEN BY:    Group 27	                 		             *
 //* DATE CREATED:                                                    *
 //* MODIFIED:                                                        *
 //*==================================================================*
-//* PROGRAMMED IN: Eclipse Luna Service Release 1 (4.4.1)            *
-//* TARGET:    PC or STM32F0?                                        *
+//* PROGRAMMED IN:           *
+//* TARGET:  STM32F0                                      *
 //*==================================================================*
 //* DESCRIPTION:                                                     *
 //*                                                                  *
@@ -38,9 +38,10 @@
 char start = 0;					//For starting switch
 char sensor_state;				//Current sensor state
 char Path[100];					//Array to record all turns taken
+char Return_path[100];
 int ptr = 0;					//Initialize pointer to record current sensor states in Path array
 char direction;                 // direction for path array
-
+int number_of_turns;            //Keeps tracks of how many turns the robot took -1
 //====================================================================
 // FUNCTION DECLARATIONS
 //====================================================================
@@ -54,6 +55,8 @@ void U_turn(void);
 void stop(void);
 void shorten_path(void);
 void realign(void);
+void return_to_start(void);
+void race(void);
 //====================================================================
 // MAIN FUNCTION
 //====================================================================
@@ -63,7 +66,8 @@ void main(void)
 	init_Ports();
 
 	//wait for start button to be pushed
-    while(1){							//infinite loop to keep checking start switch(sw0)
+    while(1)                            //infinite loop to keep checking start switch(sw0)
+    {
 		if(!(GPIOA->IDR & sw0)){		//sw0 pushed
 			start = 1;					//start path finder algorithm
 			delay(100000);
@@ -71,7 +75,8 @@ void main(void)
 	}
 
 	//start once sw0 has been pressed
-	while(start == 1){
+	while(start == 1)
+    {
 		move_Forward();					//Default function is move Forward
 
 		for(int i = 0;i < 4; i++){		//Prevents more than 4 consecutive left turns in a row
@@ -106,6 +111,9 @@ void main(void)
 				break;
 			case 'E':						//End of maze detected
 				stop();
+				i=10;                       //For breaking out of for loop
+				start=0;                    //For breaking out of maze solving while loop
+				number_of_turns=ptr;
 				break;
 //Left turn only junctions
 			case 'T':						//T Junction detected
@@ -152,26 +160,30 @@ void main(void)
 		}									//close for loop
 
 //If robot has made more than 4 consecutive left turns then do the following:
-        ptr-=4;                         //Move to the element containing the 1st left turn
-		i=0;                            //Reset counter
-		if(sensor_state == 'T')			//T junction detected
-		{
-			turn_Right();				//Call function to turn robot right
-			Path[ptr] = direction;	    //Record the direction in the Path array (overrides 1st left turn)
-			ptr++;						//increment pointer to the next element in the array
-		}
-		else if(sensor_state == 'J')	//Left T junction detected
-		{
-			move_Forward();				//Call function to move robot forward.
-			Path[ptr] = direction;	    //Record the direction in the Path array (overrides 1st left turn)
-			ptr++;						//increment pointer to the next element in the array
-		}
-		else if(sensor_state == 'X')	//cross intersection detected
-		{
-			move_Forward();				//Call function to move robot forward.
-			Path[ptr] = direction;	    //Record the direction in the Path array (overrides 1st left turn)
-			ptr++;						//increment pointer to the next element in the array
-		}
+        if(start==1)                    //Checks that the end has not been reached
+        {
+            ptr-=4;                     //Move to the element containing the 1st left turn
+            i=0;                        //Reset counter
+            if(sensor_state == 'T')			//T junction detected
+            {
+                turn_Right();				//Call function to turn robot right
+                Path[ptr] = direction;	    //Record the direction in the Path array (overrides 1st left turn)
+                ptr++;						//increment pointer to the next element in the array
+            }
+            else if(sensor_state == 'J')	//Left T junction detected
+            {
+                move_Forward();				//Call function to move robot forward.
+                Path[ptr] = direction;	    //Record the direction in the Path array (overrides 1st left turn)
+                ptr++;						//increment pointer to the next element in the array
+            }
+            else if(sensor_state == 'X')	//cross intersection detected
+            {
+                move_Forward();				//Call function to move robot forward.
+                Path[ptr] = direction;	    //Record the direction in the Path array (overrides 1st left turn)
+                ptr++;						//increment pointer to the next element in the array
+            }
+        }
+
 	}
 
 
@@ -223,7 +235,7 @@ void get_sensor_status(void)
         sensor_state = 'X'; //Cross intersection detected
     }
     else if(((GPIOB_IDR & PB3) != 0)&&((GPIOB_IDR & PB4) != 0)&&((GPIOB_IDR & PB5) == 0)
-            &&((GPIOB_IDR & PB6) != 0)&&((GPIOB_IDR & PB7) != 0)&&((GPIOB_IDR & PB8) == 0))
+            &&((GPIOB_IDR & PB6) != 0)&&((GPIOB_IDR & PB7) != 0))
     {
         sensor_state = 'T'; //T junction detected
     }
@@ -407,6 +419,40 @@ void realign(void) // Realigns robot onto a straight line
             get_sensor_status();
         }
         GPIO->ODR = 0b10010; // go straight
+    }
+}
+void return_to_start(void)
+{
+    for(int ix = number_of_turns; ix > -1; ix--)  //Creates return path
+    {
+        switch(Path[ptr])
+        {
+        case 'F':
+            Return_path[ptr] = 'F';
+            break;
+        case 'R':
+            Return_path[ptr] = 'L';
+            break;
+        case 'L':
+            Return_path[ptr] = 'R';
+            break;
+        }
+    }
+    U_turn();
+    for(int jx = 0; jx < number_of_turns+1; jx++) //Returns to start
+    {
+        switch(Return_path[ptr])
+        {
+        case 'F':
+            move_Forward();
+            break;
+        case 'R':
+            turn_Right();
+            break;
+        case 'L':
+            turn_Left();
+            break;
+        }
     }
 }
 //********************************************************************
