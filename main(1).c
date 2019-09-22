@@ -75,7 +75,6 @@ void main(void)
 		move_Forward();					//Default function is move Forward
 
 		for(int i = 0;i < 4; i++){		//Prevents more than 4 consecutive left turns in a row
-			//                                     get_sensor_status();
 			switch(sensor_state)		//Switch case for sensor states commands
 			{
 			case 'R':						//Right Turn Only detected
@@ -91,7 +90,6 @@ void main(void)
 				break;
 			case 'I':						//Right T Junction detected
 				move_Forward();				//Call function to move robot forward
-
 				Path[ptr] = direction;	    //Record the direction in the Path array
                 if(Path[ptr-1] == 'U')
                 {
@@ -102,20 +100,16 @@ void main(void)
 				break;
 			case 'U':						//Dead end detected
 				U_turn();					//Call function to turn robot around
-
 				Path[ptr] = direction;	    //Record the direction in the Path array
 				ptr++;						//increment pointer to the next element in the Path array
 				i = 0;						//restart left turn counter
 				break;
 			case 'E':						//End of maze detected
 				stop();
-				U_turn();					//Turn robot around
-				get_shortest_path();		//Find the shortest path home.(No idea how we're going to do this!)
 				break;
 //Left turn only junctions
 			case 'T':						//T Junction detected
 				turn_Left();				//Call function to turn robot left
-
 				Path[ptr] = direction;	    //Record the direction in the Path array
                 if(Path[ptr-1] == 'U')
                 {
@@ -126,7 +120,6 @@ void main(void)
 				break;
 			case 'J':						//Left T Junction detected
 				turn_Left();				//Call function to turn robot left
-
 				Path[ptr] = direction;	    //Record the direction in the Path array
                 if(Path[ptr-1] == 'U')
                 {
@@ -137,7 +130,6 @@ void main(void)
 				break;
 			case 'L':						//Left Turn detected
 				turn_Left();				//Call function to turn robot left
-
 				Path[ptr] = direction;	    //Record the direction in the Path array
                 if(Path[ptr-1] == 'U')
                 {
@@ -148,7 +140,6 @@ void main(void)
 				break;
 			case 'X':						//cross intersection detected
 				turn_Left();				//Call function to turn robot left
-
 				Path[ptr] = direction;	    //Record the direction in the Path array
                 if(Path[ptr-1] == 'U')
                 {
@@ -166,7 +157,6 @@ void main(void)
 		if(sensor_state == 'T')			//T junction detected
 		{
 			turn_Right();				//Call function to turn robot right
-
 			Path[ptr] = direction;	    //Record the direction in the Path array (overrides 1st left turn)
 			ptr++;						//increment pointer to the next element in the array
 		}
