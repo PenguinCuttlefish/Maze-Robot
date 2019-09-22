@@ -38,7 +38,7 @@
 char start = 0;					//For starting switch
 char sensor_state;				//Current sensor state
 char Path[100];					//Array to record all turns taken
-char Return_path[100];
+char Return_path[100];          //Array for reverse path
 int ptr = 0;					//Initialize pointer to record current sensor states in Path array
 char direction;                 // direction for path array
 int number_of_turns;            //Keeps tracks of how many turns the robot took -1
@@ -357,6 +357,7 @@ void U_turn(void)
 void stop(void)
 {
     GIOP->ODR = 0b00000; //Set PA1, PA2, PA3 and PA4 low
+    //BLINK LED CODE TO BE WRITTEN
 }
 
 void shorten_path(void)
@@ -392,6 +393,7 @@ void shorten_path(void)
         path[ptr]=='R';
     }
 }
+
 void delay(int a)
 {
 	volatile int i,j;
@@ -400,6 +402,7 @@ void delay(int a)
 		}
 	}
 }
+
 void realign(void) // Realigns robot onto a straight line
 {
     if(((GPIO->IDR & PB4)!=0)&&((GPIO->IDR & PB3)==0)) //outer left sensor not detected, inner left detected
@@ -421,27 +424,28 @@ void realign(void) // Realigns robot onto a straight line
         GPIO->ODR = 0b10010; // go straight
     }
 }
+
 void return_to_start(void)
 {
     for(int ix = number_of_turns; ix > -1; ix--)  //Creates return path
     {
-        switch(Path[ptr])
+        switch(Path[ix])
         {
         case 'F':
-            Return_path[ptr] = 'F';
+            Return_path[ix] = 'F';
             break;
         case 'R':
-            Return_path[ptr] = 'L';
+            Return_path[ix] = 'L';
             break;
         case 'L':
-            Return_path[ptr] = 'R';
+            Return_path[ix] = 'R';
             break;
         }
     }
     U_turn();
     for(int jx = 0; jx < number_of_turns+1; jx++) //Returns to start
     {
-        switch(Return_path[ptr])
+        switch(Return_path[jx])
         {
         case 'F':
             move_Forward();
@@ -454,6 +458,27 @@ void return_to_start(void)
             break;
         }
     }
+    stop();
+}
+
+void race(void)  //Takes shortest path from start to end
+{
+    for(int id = 0; id < number_of_turns+1; id++)
+    {
+        switch(Path[id])
+        {
+        case 'F':
+            move_Forward();
+            break;
+        case 'R':
+            turn_Right();
+            break;
+        case 'L':
+            turn_Left();
+            break;
+        }
+    }
+    stop();
 }
 //********************************************************************
 // END OF PROGRAM
