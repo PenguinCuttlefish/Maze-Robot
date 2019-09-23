@@ -79,7 +79,7 @@ void main(void)
     {
 		move_Forward();					//Default function is move Forward
 
-		for(int i = 0;i < 10; i++){      //Prevents more than 10 consecutive left turns in a row (4 would work if each straight path was the same length) 
+		for(int i = 0;i < 4; i++){      //Prevents more than 4 consecutive left turns in a row
 			switch(sensor_state)		//Switch case for sensor states commands
 			{
 			case 'R':						//Right Turn Only detected
