@@ -65,18 +65,7 @@ void race(void);
 void main(void)
 {
 	init_Ports();
-
-	//wait for start button to be pushed
-    while(start != 1)                            // Checks state of start switch(sw0)
-    {
-		if(!(GPIOA->IDR & sw0))			//sw0 pushed
-		{		
-			start = 1;					//start path finder algorithm
-			delay(100000);
-		}
-	}
-	//start once sw0 has been pressed
-	while(start == 1)
+	while(1)
     {
         //Buttons indicate low when pressed
         while(start==0)                           //Loop to check for button presses
