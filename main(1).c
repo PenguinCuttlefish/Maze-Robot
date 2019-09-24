@@ -373,7 +373,14 @@ void U_turn(void)
 void stop(void)
 {
     GIOP->ODR = 0b00000; //Set PA1, PA2, PA3 and PA4 low
-    //BLINK LED CODE TO BE WRITTEN
+    while(sensor_state=='E') //LED blinks when the robot is at the end circle
+    {
+        GPIO->ODR = 0b100000;
+        delay(1000);
+        GPIO->ODR = 0b000000;
+        delay(1000);
+        get_sensor_status();
+    }
 }
 
 void shorten_path(void)
