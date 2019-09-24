@@ -122,10 +122,10 @@ void main(void)
                     i = 0;						//restart left turn counter
                     break;
                 case 'E':						//End of maze detected
-                    stop();
+                    number_of_turns=ptr;
                     i=10;                       //For breaking out of for loop
                     start=0;                    //For breaking out of maze solving while loop
-                    number_of_turns=ptr;
+                    stop();
                     break;
     //Left turn only junctions
                 case 'T':						//T Junction detected
