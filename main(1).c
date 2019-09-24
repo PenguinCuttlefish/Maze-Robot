@@ -209,19 +209,22 @@ void init_Ports(void){
 
 //INPUTS
 //Start switch set up
-	GPIOB->MODER &= ~(GPIO_MODER_MODER0);	//Set PB0 for start switch (sw0) (solve maze)
+	//GPIOB->MODER &= ~(GPIO_MODER_MODER0);	//Set PB0 for start switch (sw0) (solve maze)
 	GPIOB->PUPDR |= GPIO_PUPDR_PUPDR0_0;	//Enable pull up resister for start switch SW0
-	GPIOB->MODER &= ~(GPIO_MODER_MODER1);	//Set PB1 for start switch (sw1) (return)
-	GPIOB->PUPDR |= GPIO_PUPDR_PUPDR0_1;	//Enable pull up resister for SW1
-	GPIOB->MODER &= ~(GPIO_MODER_MODER2);	//Set PB2 for start switch (sw2) (solve maze)
-	GPIOB->PUPDR |= GPIO_PUPDR_PUPDR0_2;	//Enable pull up resister for SW2
+	//GPIOB->MODER &= ~(GPIO_MODER_MODER1);	//Set PB1 for start switch (sw1) (return)
+	GPIOB->PUPDR |= GPIO_PUPDR_PUPDR1_0;	//Enable pull up resister for SW1
+	//GPIOB->MODER &= ~(GPIO_MODER_MODER2);	//Set PB2 for start switch (sw2) (solve maze)
+	GPIOB->PUPDR |= GPIO_PUPDR_PUPDR2_0;	//Enable pull up resister for SW2
 //Set pins to input for sensors
-	GPIOB->MODER &= ~ (GPIO_MODER_MODER3_0|  //PB3 to input for sensor LL
-					   GPIO_MODER_MODER4_0|  //PB4 to input for sensor L
-					   GPIO_MODER_MODER5_0|  //PB5 to input for sensor |
-					   GPIO_MODER_MODER6_0|  //PB6 to input for sensor R
-					   GPIO_MODER_MODER7_0|	 //PB7 to input for sensor RR
-					   GPIO_MODER_MODER8_0); //PB8 to input for FINISH sensor
+	GPIOB->MODER &= ~ (GPIO_MODER_MODER0|
+                       GPIO_MODER_MODER1|
+                       GPIO_MODER_MODER2|
+                       GPIO_MODER_MODER3|  //PB3 to input for sensor LL
+					   GPIO_MODER_MODER4|  //PB4 to input for sensor L
+					   GPIO_MODER_MODER5|  //PB5 to input for sensor |
+					   GPIO_MODER_MODER6|  //PB6 to input for sensor R
+					   GPIO_MODER_MODER7|	 //PB7 to input for sensor RR
+					   GPIO_MODER_MODER8); //PB8 to input for FINISH sensor
 
 //OUTPUTS
 //Set pins to output for motor driver
