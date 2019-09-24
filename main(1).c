@@ -33,6 +33,7 @@
 #define PA2      GPIO_ODR_2
 #define PA3      GPIO_ODR_3
 #define PA4      GPIO_ODR_4
+#define PA5      GPIO_ODR_5 `   //For Blinking LED
 //====================================================================
 // GLOBAL VARIABLES
 //====================================================================
@@ -210,7 +211,10 @@ void init_Ports(void){
 //Start switch set up
 	GPIOA->MODER &= ~(GPIO_MODER_MODER0);	//Set PA0 for start switch (sw0) (solve maze)
 	GPIOA->PUPDR |= GPIO_PUPDR_PUPDR0_0;	//Enable pull up resister for start switch SW0
-
+	GPIOA->MODER &= ~(GPIO_MODER_MODER1);	//Set PA1 for start switch (sw1) (return)
+	GPIOA->PUPDR |= GPIO_PUPDR_PUPDR0_1;	//Enable pull up resister for SW1
+	GPIOA->MODER &= ~(GPIO_MODER_MODER2);	//Set PA0 for start switch (sw2) (solve maze)
+	GPIOA->PUPDR |= GPIO_PUPDR_PUPDR0_2;	//Enable pull up resister for SW2
 //Set pins to input for sensors
 	GPIOB->MODER &= ~ (GPIO_MODER_MODER3_0|  //PB3 to input for sensor LL
 					   GPIO_MODER_MODER4_0|  //PB4 to input for sensor L
@@ -225,6 +229,7 @@ void init_Ports(void){
 	GPIOA->MODER |= GPIO_MODER_MODER2_0; 	//PA2 to output (input 2 of motor driver (left motor))
 	GPIOA->MODER |= GPIO_MODER_MODER3_0; 	//PA3 to output (input 3 of motor driver (right motor))
 	GPIOA->MODER |= GPIO_MODER_MODER4_0; 	//PA4 to output (input 3 of motor driver (right motor))
+	GPIOA->MODER |= GPIO_MODER_MODER5_0;    //PA5 to LED
 
 //Set pins for PWM
 }
