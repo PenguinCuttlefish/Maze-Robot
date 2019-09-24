@@ -380,6 +380,10 @@ void stop(void)
         GPIOA->ODR = 0b000000;
         delay(1000);
         get_sensor_status();
+        //Checks for button pushes
+        if(!(GPIOB->IDR & sw1)){         //sw1 pushed
+            return_to_start();
+        }
     }
 }
 
@@ -481,7 +485,7 @@ void return_to_start(void)
             break;
         }
     }
-    stop();
+    GIOPA->ODR = 0b00000;
 }
 
 void race(void)  //Takes shortest path from start to end
@@ -502,7 +506,7 @@ void race(void)  //Takes shortest path from start to end
             break;
         }
     }
-    stop();
+    GIOPA->ODR = 0b00000;
 }
 //********************************************************************
 // END OF PROGRAM
