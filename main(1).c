@@ -435,23 +435,35 @@ void delay(int a)
 
 void realign(void) // Realigns robot onto a straight line
 {
-    if(((GPIOB->IDR & PB4)!=0)&&((GPIOB->IDR & PB3)==0)) //outer left sensor not detected, inner left detected
+    while(sensor_state!='F')
     {
-        while(sensor_state!='F')
+        if(((GPIOB->IDR & PB4)!=0)&&((GPIOB->IDR & PB3)==0)) //outer left sensor not detected, inner left detected
         {
-            GPIOA->ODR = 0b00010; // turn right until realigned
-            get_sensor_status();
+            while(sensor_state!='F')
+            {
+                GPIOA->ODR = 0b00010; // turn right until realigned
+                get_sensor_status();
+            }
+            GPIOA->ODR = 0b10010; // go straight
         }
-        GPIOA->ODR = 0b10010; // go straight
-    }
-    else if(((GPIOB->IDR & PB6)!=0)&&((GPIOB->IDR & PB7)==0)) //outer right sensor not detected, inner right detected
-    {
-        while(sensor_state!='F')
+        else if(((GPIOB->IDR & PB6)!=0)&&((GPIOB->IDR & PB7)==0)) //outer right sensor not detected, inner right detected
         {
-            GPIOA->ODR = 0b10000; // turn left until realigned
-            get_sensor_status();
+            while(sensor_state!='F')
+            {
+                GPIOA->ODR = 0b10000; // turn left until realigned
+                get_sensor_status();
+            }
+            GPIOA->ODR = 0b10010; // go straight
         }
-        GPIOA->ODR = 0b10010; // go straight
+        else //Does not recognise any pattern, just keep turning left until a straight path is detected
+        {
+            while(sensor_state!='F')
+            {
+                GPIOA->ODR = 0b10000; // turn left until realigned
+                get_sensor_status();
+            }
+            GPIOA->ODR = 0b10010; // go straight
+        }
     }
 }
 
